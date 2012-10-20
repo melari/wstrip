@@ -1,0 +1,3 @@
+cp wstrip.rb wstrip
+sudo chmod +x wstrip
+echo "Build complete."
