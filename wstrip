@@ -8,9 +8,17 @@ class WStrip < TerminalRunner
 
   option "--help", 0, "", "Shows this help file."
   option "--recursive", 0, "", "Recursively get files from directories."
+  option "--extension", 1, "<extension_list>", "Only apply to files with the specified extensions."
+
   option_alias "--recursive", "-r"
+  option_alias "--extension", "-e"
+
   help <<EOS
     Removes all extra whitespace from the end of lines.
+
+    The format used for the <extension_list> is as follows:
+    rb      :   Single extension
+    "rb|js" :   Multiple extensions (note, there are no spaces).
 EOS
 
   def self.run
@@ -18,43 +26,50 @@ EOS
       show_usage
       exit
     end
-    ws = WStrip.new(@@params["input"], @@options.include?("--recursive"))
+
+    ext = @@options.include?("--extension") ? @@options["--extension"][0].split("|") : nil
+
+    ws = WStrip.new(@@params["input"], @@options.include?("--recursive"), ext)
   end
 
-  def initialize(input, r)
+  def initialize(input, r, ext)
     unless File.exists? input
       puts "Could not find input file."
       exit
     end
 
-    strip_file(input, r)
+    strip_file(input, r, ext)
   end
 
-  def strip_file(file, r)
-    puts "Stripping #{file}."
+  def strip_file(file, r, ext)
     if File.directory? file
       Dir.entries(file).select do |f|
         if (f != "." && f != "..")
           file_full = "#{file}/#{f}"
           if File.directory?(file_full)
             if r
-              strip_file(file_full, r)
+              strip_file(file_full, r, ext)
             end
           else
-            strip_file(file_full, r)
+            strip_file(file_full, r, ext)
           end
         end
       end
     else
-      lines = []
-      File.open(file, 'r').each_line do |line|
-        lines << line.rstrip
-      end
-      File.open(file, 'w') do |f|
-        lines.each do |line|
-          f.puts line
+
+      if ext.nil? || ext.include?(File.extname(file)[1..-1])
+        puts "Fixing #{file}"
+        lines = []
+        File.open(file, 'r').each_line do |line|
+          lines << line.rstrip
+        end
+        File.open(file, 'w') do |f|
+          lines.each do |line|
+            f.puts line
+          end
         end
       end
+
     end
   end
 end
