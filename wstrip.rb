@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'terminal_runner.rb'
+require_relative 'terminal_runner.rb'
 
 class WStrip < TerminalRunner
   name "WStrip"
