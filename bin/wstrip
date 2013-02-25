@@ -74,6 +74,4 @@ EOS
   end
 end
 
-if __FILE__ == $0
-  x = WStrip.start(ARGV)
-end
+WStrip.start(ARGV)
