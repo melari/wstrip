@@ -9,9 +9,11 @@ class WStrip < TerminalRunner
   option "--help", 0, "", "Shows this help file."
   option "--recursive", 0, "", "Recursively get files from directories."
   option "--extension", 1, "<extension_list>", "Only apply to files with the specified extensions."
+  option "--remove-tabs", 1, "<amount>", "Replaces all tabs by the specified number of spaces."
 
   option_alias "--recursive", "-r"
   option_alias "--extension", "-e"
+  option_alias "--remove-tabs", "-t"
 
   help <<EOS
     Removes all extra whitespace from the end of lines.
@@ -61,7 +63,11 @@ EOS
         puts "Fixing #{file}"
         lines = []
         File.open(file, 'r').each_line do |line|
-          lines << line.rstrip
+          new_line = line.rstrip
+          if @@options.include?("--remove-tabs")
+            new_line = new_line.gsub(/\t/, " " * @@options["--remove-tabs"][0].to_i)
+          end
+          lines << new_line
         end
         File.open(file, 'w') do |f|
           lines.each do |line|
